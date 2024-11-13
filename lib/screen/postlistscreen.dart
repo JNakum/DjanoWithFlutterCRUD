@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:crud_demo/provider/postprovider.dart';
 import 'package:crud_demo/screen/insertdata.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,19 @@ class Postlistscreen extends StatefulWidget {
 }
 
 class _PostlistscreenState extends State<Postlistscreen> {
+  final Random _random = Random(); // Random instance for generating colors
+
+  // Color options list
+  final List<Color> _colors = [
+    Colors.lightBlue[100]!,
+    Colors.lightGreen[100]!,
+    Colors.pink[100]!,
+    Colors.orange[100]!,
+    Colors.purple[100]!,
+    Colors.yellow[100]!,
+    Colors.teal[100]!,
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -18,6 +32,11 @@ class _PostlistscreenState extends State<Postlistscreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<Postprovider>(context, listen: false).fetchPosts();
     });
+  }
+
+  // Method to get a random color from _colors list
+  Color _getRandomColor() {
+    return _colors[_random.nextInt(_colors.length)];
   }
 
   @override
@@ -36,19 +55,18 @@ class _PostlistscreenState extends State<Postlistscreen> {
                 },
                 icon: const Icon(Icons.refresh),
               ),
-              const SizedBox(
-                width: 10,
-              ),
+              const SizedBox(width: 10),
               IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const Insertdata(),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.insert_drive_file))
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Insertdata(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.insert_drive_file),
+              ),
             ],
           ),
         ],
@@ -59,46 +77,69 @@ class _PostlistscreenState extends State<Postlistscreen> {
             itemCount: provider.posts.length,
             itemBuilder: (context, index) {
               final post = provider.posts[index];
-              return ListTile(
-                title: Text(
-                  "Id :- ${post.id}  \nTitle :- ${post.name}",
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: Colors.deepOrange,
-                  ),
+              return Card(
+                color: _getRandomColor(), // Random color for each card
+                margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                subtitle: Text(
-                  "Body :- ${post.description}",
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.teal,
-                  ),
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Insertdata(
-                              post: post,
-                            ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Id: ${post.id}",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Title: ${post.name}",
+                        style: const TextStyle(
+                          fontSize: 24,
+                          color: Color.fromARGB(255, 8, 38, 63),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Body: ${post.description}",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Insertdata(
+                                    post: post,
+                                  ),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.edit, color: Colors.blue),
                           ),
-                        );
-                      },
-                      icon: const Icon(Icons.edit),
-                    ),
-                    IconButton(
-                      onPressed: () async {
-                        await provider.deletePost(post.id);
-                        await provider
-                            .fetchPosts(); // Deletion ke baad data reload
-                      },
-                      icon: const Icon(Icons.delete),
-                    ),
-                  ],
+                          IconButton(
+                            onPressed: () async {
+                              await provider.deletePost(post.id);
+                              await provider
+                                  .fetchPosts(); // Deletion ke baad data reload
+                            },
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
